@@ -1,8 +1,13 @@
-from fastapi import FastAPI
-from .routes import todo
 from contextlib import asynccontextmanager
+
+from fastapi import FastAPI
+
 from app.database import sessionmanager
 from app.utils import use_route_names_as_operation_ids
+
+from .routes import todo
+from fastapi.middleware.cors import CORSMiddleware
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -15,8 +20,25 @@ async def lifespan(app: FastAPI):
         await sessionmanager.close()
 
 
-app = FastAPI(lifespan=lifespan, title="Todo api", docs_url="/api/docs")
+app = FastAPI(
+    lifespan=lifespan,
+    title="Todo api",
+    docs_url="/api/docs",
+    openapi_url="/api/openapi.json"
+)
 
-app.include_router(todo.router, prefix='/api')
+origins = [
+    "http://localhost:5000",
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+app.include_router(todo.router, prefix="/api")
 
 use_route_names_as_operation_ids(app)

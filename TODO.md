@@ -13,7 +13,7 @@
 - [x] Start frontend project
 - [x] Move api to subfolder
 - [x] Setup NextJS basics with theme switching, color variables, css reset
-- [ ] Generate Typescript api client on frontend from openapi specs
+- [x] Generate Typescript api client on frontend from openapi specs
 - [ ] Implement todo crud on FE
 - [ ] Auth setup on FE
 - [ ] Auth setup on BE + users table

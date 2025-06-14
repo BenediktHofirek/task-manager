@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { client as apiClient } from '@/api/client.gen';
+import { client as apiClient } from "@/api/client.gen";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "next-themes";
@@ -20,23 +20,24 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   apiClient.setConfig({
-    baseURL: 'http://localhost:8000'
+    baseURL:
+      typeof window === "undefined"
+        ? process.env.API_URL
+        : window.location.href,
   });
 
   return (
     <html lang="en" suppressHydrationWarning>
-        <body
-          className={`${inter.variable} antialiased`}
+      <body className={`${inter.variable} antialiased`}>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
         >
-          <ThemeProvider
-            attribute="class"
-            defaultTheme="system"
-            enableSystem
-            disableTransitionOnChange
-          >
-            {children}
-          </ThemeProvider>
-        </body>
-      </html>
+          {children}
+        </ThemeProvider>
+      </body>
+    </html>
   );
 }

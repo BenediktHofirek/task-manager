@@ -8,6 +8,10 @@ from app.schemas import TodoCreateSchema
 
 router = APIRouter()
 
+@router.get('/health')
+async def health():
+    return { "status": "healthy" }
+
 @router.get("/todos")
 async def get_todos(db: DbSession) -> list[TodoSchema]:
     result = await db.execute(select(Todo))
