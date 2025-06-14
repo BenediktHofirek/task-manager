@@ -6,7 +6,9 @@ dist/
 wheels/
 *.egg-info
 
+# Editors
 .ropeproject
 
 # Virtual environments
 .venv
+.env
