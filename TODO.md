@@ -12,7 +12,7 @@
 - [x] Pydantic BaseSettings
 - [x] Start frontend project
 - [x] Move api to subfolder
-- [ ] Setup NextJS basics with theme switching, color variables, css reset
+- [x] Setup NextJS basics with theme switching, color variables, css reset
 - [ ] Generate Typescript api client on frontend from openapi specs
 - [ ] Implement todo crud on FE
 - [ ] Auth setup on FE
