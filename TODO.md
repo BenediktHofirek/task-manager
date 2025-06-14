@@ -9,9 +9,9 @@
 ## Step list
 
 - [x] Ui wireframe
-- [ ] Pydantic BaseSettings
-- [ ] Start frontend project
-- [ ] Move api to subfolder
+- [x] Pydantic BaseSettings
+- [x] Start frontend project
+- [x] Move api to subfolder
 - [ ] Setup NextJS basics with theme switching, color variables, css reset
 - [ ] Generate Typescript api client on frontend from openapi specs
 - [ ] Implement todo crud on FE
