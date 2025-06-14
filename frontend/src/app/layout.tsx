@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { client as apiClient } from '@/api/client.gen';
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "next-themes";
@@ -18,6 +19,10 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  apiClient.setConfig({
+    baseURL: 'http://localhost:8000'
+  });
+
   return (
     <html lang="en" suppressHydrationWarning>
         <body

@@ -46,6 +46,7 @@
 - [ ] Nextjs docs deep dive
 - [ ] Tanstack form
 - [ ] Tanstack table?
+- [ ] Real python
 
 
 

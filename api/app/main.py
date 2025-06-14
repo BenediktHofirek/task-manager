@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from .routes import todo
 from contextlib import asynccontextmanager
 from app.database import sessionmanager
+from app.utils import use_route_names_as_operation_ids
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -17,3 +18,5 @@ async def lifespan(app: FastAPI):
 app = FastAPI(lifespan=lifespan, title="Todo api", docs_url="/api/docs")
 
 app.include_router(todo.router, prefix='/api')
+
+use_route_names_as_operation_ids(app)

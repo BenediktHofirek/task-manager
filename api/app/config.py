@@ -1,9 +1,8 @@
-from pydantic import BaseModel, Field, SecretStr
+from pydantic import BaseModel, SecretStr
 from pydantic_settings import (
     BaseSettings,
     SettingsConfigDict,
 )
-
 
 class DatabaseSettings(BaseModel):
     name: str

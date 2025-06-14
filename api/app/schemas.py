@@ -1,7 +1,11 @@
 from datetime import date
 from pydantic import BaseModel, ConfigDict
+from fastapi_camelcase import CamelModel
 
-class TodoBase(BaseModel):
+class BaseSchema(CamelModel):
+    pass
+
+class TodoBase(BaseSchema):
     title: str
     description: str
     is_completed: bool

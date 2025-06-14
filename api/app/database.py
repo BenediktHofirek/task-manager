@@ -9,7 +9,7 @@ from typing import Any, AsyncIterator
 from .config import settings
 
 DATABASE_URL = (
-    f"postgresql+asyncpg://{settings.db.user}:{settings.db.password}"
+    f"postgresql+asyncpg://{settings.db.user}:{settings.db.password.get_secret_value()}"
     f"@{settings.db.host}:{settings.db.port}/{settings.db.name}"
 )
 

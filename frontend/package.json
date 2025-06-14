@@ -6,9 +6,11 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "generate-api": "openapi-ts"
   },
   "dependencies": {
+    "axios": "^1.9.0",
     "clsx": "^2.1.1",
     "lucide-react": "^0.515.0",
     "next": "15.3.3",
@@ -19,6 +21,7 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
+    "@hey-api/openapi-ts": "^0.73.0",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
