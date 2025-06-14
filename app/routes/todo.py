@@ -1,6 +1,6 @@
 from app.schemas import TodoUpdateSchema
 from fastapi import APIRouter, HTTPException, status
-from app.dependencies import DBSessionDep
+from app.dependencies import DbSession
 from sqlalchemy import select
 from app.schemas import TodoSchema
 from app.models import Todo
@@ -9,14 +9,14 @@ from app.schemas import TodoCreateSchema
 router = APIRouter()
 
 @router.get("/todos")
-async def get_todos(db: DBSessionDep) -> list[TodoSchema]:
+async def get_todos(db: DbSession) -> list[TodoSchema]:
     result = await db.execute(select(Todo))
 
     todos = result.scalars().all()
     return todos
 
 @router.get("/todos/{id}")
-async def get_todo_by_id(db: DBSessionDep, id: int) -> TodoSchema:
+async def get_todo_by_id(db: DbSession, id: int) -> TodoSchema:
     result = await db.execute(select(Todo).where(Todo.id == id))
     todo = result.scalar_one_or_none()
 
@@ -26,7 +26,7 @@ async def get_todo_by_id(db: DBSessionDep, id: int) -> TodoSchema:
     return todo
 
 @router.put("/todos/{id}")
-async def update_todo(db: DBSessionDep, dto: TodoUpdateSchema, id: int) -> TodoSchema:
+async def update_todo(db: DbSession, dto: TodoUpdateSchema, id: int) -> TodoSchema:
     todo = (await db.execute(select(Todo).where(Todo.id == id))).scalar_one_or_none()
     if not todo:
         raise HTTPException(status_code=404)
@@ -38,7 +38,7 @@ async def update_todo(db: DBSessionDep, dto: TodoUpdateSchema, id: int) -> TodoS
     return todo
 
 @router.post("/todos", status_code=status.HTTP_201_CREATED)
-async def create_todo(db: DBSessionDep, dto: TodoCreateSchema) -> TodoSchema:
+async def create_todo(db: DbSession, dto: TodoCreateSchema) -> TodoSchema:
     todo = Todo(**dto.model_dump())
 
     db.add(todo)
@@ -48,7 +48,7 @@ async def create_todo(db: DBSessionDep, dto: TodoCreateSchema) -> TodoSchema:
     return todo
 
 @router.delete("/todos/{id}", status_code=status.HTTP_204_NO_CONTENT) 
-async def delete_todo(db: DBSessionDep, id: int) -> None: 
+async def delete_todo(db: DbSession, id: int) -> None: 
     todo = (await db.execute(select(Todo).where(Todo.id == id))).scalar_one_or_none()
     if not todo:
         raise HTTPException(status_code=404)

@@ -1,14 +1,16 @@
+name: todo-app
+
 services:
   db:
     image: postgres:latest
     container_name: todo-app-db
     restart: always
     ports:
-      - "${DB_PORT}:5432"
+      - "${DB__PORT}:5432"
     environment:
-      POSTGRES_DB: ${DB_NAME}
-      POSTGRES_USER: ${DB_USER}
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB__NAME}
+      POSTGRES_USER: ${DB__USER}
+      POSTGRES_PASSWORD: ${DB__PASSWORD}
     volumes:
       - db_data:/var/lib/postgresql/data
 

@@ -6,11 +6,11 @@ from sqlalchemy.ext.asyncio import (
 )
 from contextlib import asynccontextmanager
 from typing import Any, AsyncIterator
-from .config import config
+from .config import settings
 
 DATABASE_URL = (
-    f"postgresql+asyncpg://{config['DB_USER']}:{config['DB_PASSWORD']}"
-    f"@{config['DB_HOST']}:{config['DB_PORT']}/{config['DB_NAME']}"
+    f"postgresql+asyncpg://{settings.db.user}:{settings.db.password}"
+    f"@{settings.db.host}:{settings.db.port}/{settings.db.name}"
 )
 
 class DatabaseSessionManager:
@@ -56,8 +56,8 @@ class DatabaseSessionManager:
 sessionmanager = DatabaseSessionManager(
     DATABASE_URL,
     engine_kwargs={
-        'pool_size': int(config['DB_CONNECTION_COUNT']),
-        'max_overflow': int(config['DB_CONNECTION_OVERFLOW']),
+        'pool_size': settings.db.connection_count,
+        'max_overflow': settings.db.connection_overflow,
         'pool_timeout': 30,
         'pool_pre_ping': True,
         'echo': True,
