@@ -1,15 +1,19 @@
+import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
+import { getQueryClient } from "../get-query-client";
+import TodosTable from "./todos-table";
 import { getTodos } from "@/api";
-import { client } from "@/api/client.gen";
-import TodosTable from "./_components/todos-table";
 
-export default async function Todos() {
-  const { data: todos } = await getTodos({ client });
+export default async function TodosPage() {
+  const queryClient = getQueryClient();
 
-  if (!todos) {
-    return <div>{"Sorry, an error happened"}</div>;
-  }
+  await queryClient.prefetchQuery({
+    queryKey: ["todos"],
+    queryFn: () => getTodos()
+  });
 
   return (
-    <TodosTable todos={todos} />
+    <HydrationBoundary state={dehydrate(queryClient)}>
+      <TodosTable />
+    </HydrationBoundary>
   );
 }

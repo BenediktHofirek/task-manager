@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
-import { client as apiClient } from "@/api/client.gen";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "next-themes";
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
+import Providers from "./providers";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -19,13 +20,6 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  apiClient.setConfig({
-    baseURL:
-      typeof window === "undefined"
-        ? process.env.API_URL
-        : window.location.href,
-  });
-
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${inter.variable} antialiased`}>
@@ -35,7 +29,10 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          {children}
+          <Providers>
+            {children}
+            <ReactQueryDevtools initialIsOpen={false} />
+          </Providers>
         </ThemeProvider>
       </body>
     </html>

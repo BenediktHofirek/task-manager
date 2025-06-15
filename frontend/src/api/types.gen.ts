@@ -98,6 +98,20 @@ export type ValidationError = {
   type: string;
 };
 
+export type HealthData = {
+  body?: never;
+  path?: never;
+  query?: never;
+  url: "/api/health";
+};
+
+export type HealthResponses = {
+  /**
+   * Successful Response
+   */
+  200: unknown;
+};
+
 export type GetTodosData = {
   body?: never;
   path?: never;
@@ -232,5 +246,5 @@ export type UpdateTodoResponses = {
 export type UpdateTodoResponse = UpdateTodoResponses[keyof UpdateTodoResponses];
 
 export type ClientOptions = {
-  baseURL: "http://localhost:8000" | (string & {});
+  baseUrl: "http://localhost:8000" | (string & {});
 };

@@ -1,14 +1,17 @@
 import { defineConfig } from '@hey-api/openapi-ts';
 
 export default defineConfig({
-  input: 'http://localhost:8000/openapi.json',
+  input: 'http://localhost:8000/api/openapi.json',
   output: {
     format: 'prettier',
     lint: 'eslint',
     path: './src/api',
   },
   plugins: [
-    '@hey-api/client-axios',
+    { 
+      name: '@hey-api/client-fetch',
+      runtimeConfigPath: './src/app/api-client-config.ts' 
+    },
     '@hey-api/schemas',
     {
       dates: true,

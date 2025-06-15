@@ -1,10 +1,15 @@
 "use client";
-
-import { TodoSchema } from "@/api";
+import { getTodos } from "@/api";
+import { useQuery } from "@tanstack/react-query";
 import { Plus, X } from "lucide-react";
 import { DynamicIcon } from "lucide-react/dynamic";
 
-export default function TodosTable({ todos }: { todos: TodoSchema[] }) {
+export default function TodosTable() {
+  const { data: todos, isPending, isError } = useQuery({
+    queryFn: () => getTodos(),
+    queryKey: ['todos']
+  });
+
   const addTodo = () => {
     console.log("Adding todo");
   };
@@ -12,6 +17,10 @@ export default function TodosTable({ todos }: { todos: TodoSchema[] }) {
   const deleteTodo = (id: number) => {
     console.log('Delete todo', id);
   }
+
+  if (isPending) return <div>Pending</div>
+
+  if (isError) return <div>Error</div>
 
   return (
     <div className="mx-auto block w-max overflow-x-auto rounded-xl shadow">

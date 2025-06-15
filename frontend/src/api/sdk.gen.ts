@@ -2,6 +2,8 @@
 
 import type { Options as ClientOptions, TDataShape, Client } from "./client";
 import type {
+  HealthData,
+  HealthResponses,
   GetTodosData,
   GetTodosResponses,
   CreateTodoData,
@@ -37,6 +39,22 @@ export type Options<
 };
 
 /**
+ * Health
+ */
+export const health = <ThrowOnError extends boolean = false>(
+  options?: Options<HealthData, ThrowOnError>,
+) => {
+  return (options?.client ?? _heyApiClient).get<
+    HealthResponses,
+    unknown,
+    ThrowOnError
+  >({
+    url: "/api/health",
+    ...options,
+  }).then((response) => response.data as Exclude<typeof response.data, undefined>);
+};
+
+/**
  * Get Todos
  */
 export const getTodos = <ThrowOnError extends boolean = false>(
@@ -47,10 +65,9 @@ export const getTodos = <ThrowOnError extends boolean = false>(
     unknown,
     ThrowOnError
   >({
-    responseType: "json",
     url: "/api/todos",
     ...options,
-  });
+  }).then((response) => response.data as Exclude<typeof response.data, undefined>);
 };
 
 /**
@@ -64,14 +81,13 @@ export const createTodo = <ThrowOnError extends boolean = false>(
     CreateTodoErrors,
     ThrowOnError
   >({
-    responseType: "json",
     url: "/api/todos",
     ...options,
     headers: {
       "Content-Type": "application/json",
       ...options.headers,
     },
-  });
+  }).then((response) => response.data as Exclude<typeof response.data, undefined>);
 };
 
 /**
@@ -87,7 +103,7 @@ export const deleteTodo = <ThrowOnError extends boolean = false>(
   >({
     url: "/api/todos/{id}",
     ...options,
-  });
+  }).then((response) => response.data as Exclude<typeof response.data, undefined>);
 };
 
 /**
@@ -101,10 +117,9 @@ export const getTodoById = <ThrowOnError extends boolean = false>(
     GetTodoByIdErrors,
     ThrowOnError
   >({
-    responseType: "json",
     url: "/api/todos/{id}",
     ...options,
-  });
+  }).then((response) => response.data as Exclude<typeof response.data, undefined>);
 };
 
 /**
@@ -118,12 +133,11 @@ export const updateTodo = <ThrowOnError extends boolean = false>(
     UpdateTodoErrors,
     ThrowOnError
   >({
-    responseType: "json",
     url: "/api/todos/{id}",
     ...options,
     headers: {
       "Content-Type": "application/json",
       ...options.headers,
     },
-  });
+  }).then((response) => response.data as Exclude<typeof response.data, undefined>);
 };
