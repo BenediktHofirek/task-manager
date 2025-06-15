@@ -1,21 +1,45 @@
 "use client";
-import { getTodos } from "@/api";
-import { useQuery } from "@tanstack/react-query";
+import { deleteTodo, getTodos, TodoSchema } from "@/api";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Plus, X } from "lucide-react";
 import { DynamicIcon } from "lucide-react/dynamic";
 
 export default function TodosTable() {
+  const queryClient = useQueryClient()
+
   const { data: todos, isPending, isError } = useQuery({
     queryFn: () => getTodos(),
     queryKey: ['todos']
   });
 
-  const addTodo = () => {
+  const handleAddTodo = () => {
     console.log("Adding todo");
   };
 
-  const deleteTodo = (id: number) => {
-    console.log('Delete todo', id);
+  const deleteTodoMutation = useMutation({
+    mutationFn: (path: { id: number }) => deleteTodo({ path }),
+    onMutate: async ({ id }) => {
+      console.log('deleting', id);
+
+      await queryClient.cancelQueries({ queryKey: ['todos'] });
+      const previousTodos = queryClient.getQueryData(['todos']);
+
+      queryClient.setQueryData(['todos'], (old: TodoSchema[]) => {
+        return old.filter((item) => item.id !== id);
+      });
+
+      return { previousTodos };
+    },
+    onError: (err, id, context) => {
+      queryClient.setQueryData(['todos'], context?.previousTodos);
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['todos'] })
+    }
+  });
+
+  const handleDeleteTodo = (id: number) => {
+    deleteTodoMutation.mutate({ id });
   }
 
   if (isPending) return <div>Pending</div>
@@ -34,7 +58,7 @@ export default function TodosTable() {
             <th className="px-4 py-2">Due Date</th>
             <th className="px-4 py-2">
               <button
-                onClick={() => addTodo()}
+                onClick={() => handleAddTodo()}
                 className="block cursor-pointer rounded-lg p-4 hover:bg-gray-200 active:bg-gray-300 transition"
               >
                 <Plus className="text-xl text-green-600" />
@@ -61,7 +85,7 @@ export default function TodosTable() {
               <td>
 
                 <button
-                  onClick={() => deleteTodo(todo.id)}
+                  onClick={() => handleDeleteTodo(todo.id)}
                   className="block cursor-pointer rounded-lg p-4 hover:bg-red-100 active:bg-red-200 transition"
                 >
                   <X className="text-xl text-red-500" />

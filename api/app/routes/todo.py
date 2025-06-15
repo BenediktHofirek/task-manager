@@ -58,3 +58,4 @@ async def delete_todo(db: DbSession, id: int) -> None:
         raise HTTPException(status_code=404)
 
     await db.delete(todo)
+    await db.commit()
