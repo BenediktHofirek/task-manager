@@ -24,8 +24,6 @@ export default function TodosTable() {
   const deleteTodoMutation = useMutation({
     mutationFn: (path: { id: number }) => deleteTodo({ path }),
     onMutate: async ({ id }) => {
-      console.log("deleting", id);
-
       await queryClient.cancelQueries({ queryKey: ["todos"] });
       const previousTodos = queryClient.getQueryData(["todos"]);
 
