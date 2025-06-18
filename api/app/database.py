@@ -58,7 +58,8 @@ sessionmanager = DatabaseSessionManager(
     engine_kwargs={
         'pool_size': settings.db.connection_count,
         'max_overflow': settings.db.connection_overflow,
-        'pool_timeout': 30,
+        'pool_timeout': 5,
+        'pool_recycle': 1800,
         'pool_pre_ping': True,
         'echo': True,
         'future': True

@@ -18,21 +18,17 @@ export const TodoCreateSchemaSchema = {
   properties: {
     title: {
       type: "string",
+      maxLength: 255,
+      minLength: 4,
       title: "Title",
     },
     description: {
       type: "string",
       title: "Description",
+      default: "",
     },
     isCompleted: {
-      anyOf: [
-        {
-          type: "boolean",
-        },
-        {
-          type: "null",
-        },
-      ],
+      type: "boolean",
       title: "Iscompleted",
       default: false,
     },
@@ -50,7 +46,7 @@ export const TodoCreateSchemaSchema = {
     },
   },
   type: "object",
-  required: ["title", "description", "dueDate"],
+  required: ["title", "dueDate"],
   title: "TodoCreateSchema",
 } as const;
 
@@ -58,6 +54,8 @@ export const TodoSchemaSchema = {
   properties: {
     title: {
       type: "string",
+      maxLength: 255,
+      minLength: 4,
       title: "Title",
     },
     description: {
@@ -96,6 +94,8 @@ export const TodoUpdateSchemaSchema = {
       anyOf: [
         {
           type: "string",
+          maxLength: 255,
+          minLength: 4,
         },
         {
           type: "null",

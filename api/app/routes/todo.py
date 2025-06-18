@@ -5,6 +5,7 @@ from sqlalchemy import select
 from app.schemas import TodoSchema
 from app.models import Todo
 from app.schemas import TodoCreateSchema
+import asyncio
 
 router = APIRouter()
 
@@ -44,6 +45,7 @@ async def update_todo(db: DbSession, dto: TodoUpdateSchema, id: int) -> TodoSche
 @router.post("/todos", status_code=status.HTTP_201_CREATED)
 async def create_todo(db: DbSession, dto: TodoCreateSchema) -> TodoSchema:
     todo = Todo(**dto.model_dump())
+    await asyncio.sleep(3)
 
     db.add(todo)
     await db.commit()

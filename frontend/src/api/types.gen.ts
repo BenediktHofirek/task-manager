@@ -21,15 +21,15 @@ export type TodoCreateSchema = {
   /**
    * Description
    */
-  description: string;
+  description?: string;
   /**
    * Iscompleted
    */
-  isCompleted?: boolean | null;
+  isCompleted?: boolean;
   /**
    * Duedate
    */
-  dueDate: Date | null;
+  dueDate: string | null;
 };
 
 /**
@@ -51,7 +51,7 @@ export type TodoSchema = {
   /**
    * Duedate
    */
-  dueDate: Date | null;
+  dueDate: string | null;
   /**
    * Id
    */
@@ -77,7 +77,7 @@ export type TodoUpdateSchema = {
   /**
    * Due Date
    */
-  due_date?: Date | null;
+  due_date?: string | null;
 };
 
 /**

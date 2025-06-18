@@ -14,7 +14,7 @@ export default defineConfig({
     },
     '@hey-api/schemas',
     {
-      dates: true,
+      dates: false,
       name: '@hey-api/transformers',
     },
     {

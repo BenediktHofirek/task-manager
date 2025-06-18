@@ -20,6 +20,7 @@
 - [ ] User profile in header
 - [ ] Implement delete account on BE
 - [ ] Show account settings after clicking on user profile with name, register date and delete account button
+- [ ] Handle errors - show snackbar;
 
 - [ ] Setup gitignore
 - [ ] Setup pre-commit hooks for both be and fe formatting

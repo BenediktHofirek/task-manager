@@ -32,8 +32,8 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <Providers>
-            {children}
             {modal}
+            {children}
             <ReactQueryDevtools initialIsOpen={false} />
           </Providers>
         </ThemeProvider>
