@@ -1,9 +1,9 @@
 "use client";
 import { deleteTodo, getTodos, TodoSchema } from "@/api";
-import { useMutation, useMutationState, useQuery, useQueryClient } from "@tanstack/react-query";
+import { cn } from "@/lib/utils";
+import { useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
-import { Plus, X } from "lucide-react";
-import { DynamicIcon } from "lucide-react/dynamic";
+import { Check, Plus, SquarePen, Trash, X } from "lucide-react";
 import Link from "next/link";
 
 export default function TodosTable() {
@@ -13,25 +13,32 @@ export default function TodosTable() {
     data: todos,
     isPending,
     isError,
-  } = useQuery({
-    queryFn: () => getTodos(),
+  } = useSuspenseQuery({
+    queryFn: ({ signal }) => getTodos({ signal }),
     queryKey: ["todos"],
   });
+
+  const sortedTodos = todos.sort((a,b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
 
   const deleteTodoMutation = useMutation({
     mutationFn: (path: { id: number }) => deleteTodo({ path }),
     onMutate: async ({ id }) => {
       await queryClient.cancelQueries({ queryKey: ["todos"] });
-      const previousTodos = queryClient.getQueryData(["todos"]);
+
+      const todos: TodoSchema[] = queryClient.getQueryData(["todos"]) || [];
+      const deletedTodo = todos.find((todo) => todo.id === id);
 
       queryClient.setQueryData(["todos"], (old: TodoSchema[]) => {
         return old.filter((item) => item.id !== id);
       });
 
-      return { previousTodos };
+      return { deletedTodo };
     },
     onError: (err, id, context) => {
-      queryClient.setQueryData(["todos"], context?.previousTodos);
+      const deletedTodo = context?.deletedTodo;
+      if (deletedTodo){
+        queryClient.setQueryData(["todos"], (todos: TodoSchema[]) => todos.concat(deletedTodo));
+      }
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["todos"] });
@@ -41,16 +48,6 @@ export default function TodosTable() {
   const handleDeleteTodo = (id: number) => {
     deleteTodoMutation.mutate({ id });
   };
-
-  // const pendingTodos = useMutationState<TodoSchema>({
-  //   filters: { mutationKey: ['addTodo'], status: 'pending' },
-  //   select: (mutation) => ({
-  //     ...(mutation.state.variables as TodoSchema),
-  //     id: mutation.state.submittedAt
-  //   }),
-  // });
-  //
-  // console.log('pending', pendingTodos, todos);
 
   if (isPending) return <div>Pending</div>;
 
@@ -68,8 +65,8 @@ export default function TodosTable() {
             <th className="px-4 py-2">
               <Link
                 href="/todos/new"
-                className="block cursor-pointer rounded-lg p-4 transition hover:bg-gray-200
-                  active:bg-gray-300"
+                className="block w-min cursor-pointer rounded-lg p-3 transition hover:bg-green-100
+                  active:bg-green-200"
               >
                 <Plus className="text-xl text-green-600" />
               </Link>
@@ -77,29 +74,49 @@ export default function TodosTable() {
           </tr>
         </thead>
         <tbody className="divide-y divide-gray-200">
-          {todos.map((todo) => (
-            <tr key={todo.id}>
+          {sortedTodos.map((todo) => (
+            <tr
+              key={todo.id}
+              className={cn(
+                "group",
+                todo.id < 0 ? "cursor-wait opacity-50" : "cursor-pointer",
+              )}
+            >
               <td className="px-4 py-2 font-medium">{todo.title}</td>
               <td className="px-4 py-2">{todo.description}</td>
               <td className="px-4 py-2">
-                <DynamicIcon
-                  className={
-                    todo.isCompleted ? "text-green-600" : "text-red-500"
-                  }
-                  name={todo.isCompleted ? "check" : "x"}
-                  size="2rem"
-                ></DynamicIcon>
+                {todo.isCompleted ? (
+                  <Check className="text-green-600" />
+                ) : (
+                  <X className="text-red-600" />
+                )}
               </td>
-              <td className="px-4 py-2">{todo.dueDate ? format(new Date(todo.dueDate), 'PPP') : "—"}</td>
+              <td className="px-4 py-2">
+                {todo.dueDate ? format(new Date(todo.dueDate), "PPP") : "—"}
+              </td>
               <td>
-                <button
-                  onClick={() => handleDeleteTodo(todo.id)}
-                  disabled={todo.id < 0}
-                  className="block cursor-pointer rounded-lg p-4 transition hover:bg-red-100
-                    active:bg-red-200"
+                <div
+                  className={cn(
+                    "flex items-center p-2 opacity-0",
+                    todo.id > 0 && "group-hover:opacity-100",
+                  )}
                 >
-                  <X className="text-xl text-red-500" />
-                </button>
+                  <button
+                    onClick={() => handleDeleteTodo(todo.id)}
+                    className="block cursor-pointer rounded-lg p-3 transition hover:bg-red-100
+                      active:bg-red-200"
+                  >
+                    <Trash className="text-xl text-red-500" />
+                  </button>
+
+                  <Link
+                    href={`/todos/${todo.id}/edit`}
+                    className="block w-min cursor-pointer rounded-lg p-3 transition hover:bg-blue-100
+                      active:bg-blue-200"
+                  >
+                    <SquarePen className="text-xl text-blue-500" />
+                  </Link>
+                </div>
               </td>
             </tr>
           ))}

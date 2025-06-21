@@ -22,16 +22,11 @@ import {
 } from "@/components/ui/popover";
 import { Textarea } from "@/components/ui/textarea";
 import { CalendarDays as CalendarIcon } from "lucide-react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { createTodo, TodoCreateSchema, TodoSchema } from "@/api";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { getTodoById, TodoSchema, TodoUpdateSchema, updateTodo } from "@/api";
 import { useRouter } from "next/navigation";
-
-const today = new Date();
-const todayDateOnly = new Date(
-  today.getFullYear(),
-  today.getMonth(),
-  today.getDate(),
-);
+import { Switch } from "@/components/ui/switch";
+import { useEffect } from "react";
 
 const taskSchema = z.object({
   title: z
@@ -39,58 +34,56 @@ const taskSchema = z.object({
     .min(4, "Title must be at least 4 characters")
     .max(255, "Title must be at most 255 characters"),
   description: z.string().optional(),
-  dueDate: z
-    .date()
-    .optional()
-    .refine((inputDate) => {
-      if (!inputDate) {
-        return true;
-      }
-
-      return inputDate >= todayDateOnly;
-    }, "Due date must be today or later"),
+  dueDate: z.date().optional(),
+  isCompleted: z.boolean(),
 });
 
 type TaskFormValues = z.infer<typeof taskSchema>;
 
-export function CreateTodoForm() {
+export function EditTodoForm({ id: editedTodoId }: { id: number }) {
   const queryClient = useQueryClient();
   const router = useRouter();
 
-  const createTodoMutation = useMutation({
-    mutationFn: (dto: TodoCreateSchema) => createTodo({ body: dto }),
-    onMutate: async (newTodo) => {
-      await queryClient.cancelQueries({ queryKey: ["todos"] });
-      const temporaryId =
-        Math.round(Math.random() * Number.MAX_SAFE_INTEGER) * -1;
+  const cachedTodo = queryClient
+    .getQueryData<TodoSchema[]>(["todos"])
+    ?.find((todo) => todo.id === editedTodoId);
+  const {
+    data: editedTodo,
+    isPending,
+    isError,
+  } = useQuery({
+    queryKey: ["todos", editedTodoId],
+    queryFn: () =>
+      cachedTodo
+        ? Promise.resolve(cachedTodo)
+        : getTodoById({ path: { id: editedTodoId } }),
+    staleTime: 0
+  });
 
-      // +1e6 to make initial sort by createdAt work no matter how long
-      // the server response take - sort optimistic entities as last
-      const createdAt = new Date(Date.now() + 1e6).toISOString();
-
+  const updateTodoMutation = useMutation({
+    mutationFn: (dto: TodoUpdateSchema) =>
+      updateTodo({ body: dto, path: { id: editedTodoId } }),
+    mutationKey: ["todos", editedTodoId],
+    onMutate: async (updatedTodo) => {
       queryClient.setQueryData(["todos"], (old: TodoSchema[]) => {
-        return old.concat({
-          ...newTodo,
-          description: newTodo.description || "",
-          isCompleted: false,
-          id: temporaryId,
-          createdAt,
+        return old.map((todo) => {
+          if (todo.id === editedTodoId) {
+            return { ...todo, ...updatedTodo };
+          }
+
+          return todo;
         });
       });
 
-      return { temporaryId };
+      return { originalTodo: editedTodo };
     },
-    onError: (err, id, context) => {
-      queryClient.setQueryData(["todos"], (todos: TodoSchema[]) =>
-        todos.filter((todo) => todo.id !== context?.temporaryId),
-      );
-    },
-    onSuccess: (newTodo, variables, context) => {
-      queryClient.setQueryData(["todos"], (todos: TodoSchema[]) =>
-        todos
-          .filter((todo) => todo.id !== context?.temporaryId)
-          .concat(newTodo),
-      );
+    onError: (err, variables, context) => {
+      const originalTodo = context?.originalTodo;
+      if (originalTodo) {
+        queryClient.setQueryData(["todos"], (todos: TodoSchema[]) =>
+          todos.filter((todo) => todo.id !== editedTodoId).concat(originalTodo),
+        );
+      }
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["todos"] });
@@ -103,18 +96,33 @@ export function CreateTodoForm() {
       title: "",
       description: "",
       dueDate: undefined,
+      isCompleted: undefined
     },
   });
 
+  useEffect(() => {
+    if (editedTodo) {
+      form.reset({
+      title: editedTodo.title,
+      description: editedTodo.description,
+      dueDate: editedTodo.dueDate ? new Date(editedTodo.dueDate) : undefined,
+      isCompleted: editedTodo.isCompleted,
+    });
+    }
+  }, [editedTodo, form.reset])
+
+  if (isPending) return <div>Fetching data</div>;
+  if (isError) return <div>An error occurred</div>;
+
   const onSubmit = (data: TaskFormValues) => {
-    createTodoMutation.mutate({
+    updateTodoMutation.mutate({
       ...data,
       dueDate: data.dueDate ? format(data.dueDate, "yyyy-MM-dd") : null,
     });
     router.push("/todos");
   };
 
-  const onClose = () => {
+  const onCancel = () => {
     router.push("/todos");
   };
 
@@ -184,17 +192,34 @@ export function CreateTodoForm() {
           )}
         />
 
+        {/* Is Completed */}
+        <FormField
+          control={form.control}
+          name="isCompleted"
+          render={({ field }) => (
+            <FormItem className="flex w-max flex-row items-center justify-start gap-3 rounded-lg p-3 shadow-sm">
+              <FormControl>
+                <Switch
+                  checked={field.value}
+                  onCheckedChange={field.onChange}
+                />
+              </FormControl>
+              <FormLabel>Is Completed</FormLabel>
+            </FormItem>
+          )}
+        />
+
         <div className="flex justify-end gap-4 text-base">
           <Button
             type="button"
             variant={"secondary"}
             className="cursor-pointer text-base"
-            onClick={onClose}
+            onClick={onCancel}
           >
-            Go back
+            Cancel
           </Button>
           <Button type="submit" className="cursor-pointer">
-            Create Task
+            Save
           </Button>
         </div>
       </form>

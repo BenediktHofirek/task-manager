@@ -56,6 +56,10 @@ export type TodoSchema = {
    * Id
    */
   id: number;
+  /**
+   * Createdat
+   */
+  createdAt: string;
 };
 
 /**
@@ -71,13 +75,13 @@ export type TodoUpdateSchema = {
    */
   description?: string | null;
   /**
-   * Is Completed
+   * Iscompleted
    */
-  is_completed?: boolean | null;
+  isCompleted?: boolean | null;
   /**
-   * Due Date
+   * Duedate
    */
-  due_date?: string | null;
+  dueDate?: string | null;
 };
 
 /**

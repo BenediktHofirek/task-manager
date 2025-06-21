@@ -82,9 +82,21 @@ export const TodoSchemaSchema = {
       type: "integer",
       title: "Id",
     },
+    createdAt: {
+      type: "string",
+      format: "date-time",
+      title: "Createdat",
+    },
   },
   type: "object",
-  required: ["title", "description", "isCompleted", "dueDate", "id"],
+  required: [
+    "title",
+    "description",
+    "isCompleted",
+    "dueDate",
+    "id",
+    "createdAt",
+  ],
   title: "TodoSchema",
 } as const;
 
@@ -114,7 +126,7 @@ export const TodoUpdateSchemaSchema = {
       ],
       title: "Description",
     },
-    is_completed: {
+    isCompleted: {
       anyOf: [
         {
           type: "boolean",
@@ -123,9 +135,9 @@ export const TodoUpdateSchemaSchema = {
           type: "null",
         },
       ],
-      title: "Is Completed",
+      title: "Iscompleted",
     },
-    due_date: {
+    dueDate: {
       anyOf: [
         {
           type: "string",
@@ -135,7 +147,7 @@ export const TodoUpdateSchemaSchema = {
           type: "null",
         },
       ],
-      title: "Due Date",
+      title: "Duedate",
     },
   },
   type: "object",
