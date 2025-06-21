@@ -1,7 +1,13 @@
 "use client";
+import { uniqBy } from "es-toolkit";
 import { deleteTodo, getTodos, TodoSchema } from "@/api";
 import { cn } from "@/lib/utils";
-import { useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
+import {
+  useMutation,
+  useMutationState,
+  useQueryClient,
+  useSuspenseQuery,
+} from "@tanstack/react-query";
 import { format } from "date-fns";
 import { Check, Plus, SquarePen, Trash, X } from "lucide-react";
 import Link from "next/link";
@@ -18,31 +24,46 @@ export default function TodosTable() {
     queryKey: ["todos"],
   });
 
-  const sortedTodos = todos.sort((a,b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+  const createdTodos = useMutationState<TodoSchema>({
+    filters: { mutationKey: ["createTodo"], status: "pending" },
+    select: (mutation) => ({
+      ...(mutation.state.variables as TodoSchema),
+      // negative integer is used to distinguish optimistic create
+      id: mutation.state.submittedAt * -1,
+      // +1e6 to make initial sort by createdAt work no matter how long the server response take
+      // and how many new entries user might create in the meantime
+      createdAt: new Date(mutation.state.submittedAt + 1e6).toISOString(),
+    }),
+  });
+
+  const editedTodos = useMutationState<TodoSchema>({
+    filters: { mutationKey: ["editTodo"], status: "pending" },
+    select: (mutation) => mutation.state.variables as TodoSchema,
+  });
+
+  const deletedTodoIds = useMutationState<number>({
+    filters: { mutationKey: ["deleteTodo"], status: "pending" },
+    select: (mutation) => (mutation.state.variables as { id: number }).id,
+  });
+
+  const mergedEditedTodos = editedTodos.map((editedTodo) => ({
+    ...todos.find((todo) => todo.id === editedTodo.id),
+    ...editedTodo,
+  }));
+
+  const joinedTodos = mergedEditedTodos.concat(todos).concat(createdTodos);
+  const filteredTodos = joinedTodos.filter(
+    (todo) => !deletedTodoIds.includes(todo.id),
+  );
+  const uniqueTodos = uniqBy(filteredTodos, (todo) => todo.id);
+  const sortedTodos = uniqueTodos.sort(
+    (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
+  );
 
   const deleteTodoMutation = useMutation({
     mutationFn: (path: { id: number }) => deleteTodo({ path }),
-    onMutate: async ({ id }) => {
-      await queryClient.cancelQueries({ queryKey: ["todos"] });
-
-      const todos: TodoSchema[] = queryClient.getQueryData(["todos"]) || [];
-      const deletedTodo = todos.find((todo) => todo.id === id);
-
-      queryClient.setQueryData(["todos"], (old: TodoSchema[]) => {
-        return old.filter((item) => item.id !== id);
-      });
-
-      return { deletedTodo };
-    },
-    onError: (err, id, context) => {
-      const deletedTodo = context?.deletedTodo;
-      if (deletedTodo){
-        queryClient.setQueryData(["todos"], (todos: TodoSchema[]) => todos.concat(deletedTodo));
-      }
-    },
-    onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ["todos"] });
-    },
+    mutationKey: ["deleteTodo"],
+    onSettled: () => queryClient.invalidateQueries({ queryKey: ["todos"] }),
   });
 
   const handleDeleteTodo = (id: number) => {

@@ -23,7 +23,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { CalendarDays as CalendarIcon } from "lucide-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { createTodo, TodoCreateSchema, TodoSchema } from "@/api";
+import { createTodo, TodoCreateSchema } from "@/api";
 import { useRouter } from "next/navigation";
 
 const today = new Date();
@@ -59,42 +59,8 @@ export function CreateTodoForm() {
 
   const createTodoMutation = useMutation({
     mutationFn: (dto: TodoCreateSchema) => createTodo({ body: dto }),
-    onMutate: async (newTodo) => {
-      await queryClient.cancelQueries({ queryKey: ["todos"] });
-      const temporaryId =
-        Math.round(Math.random() * Number.MAX_SAFE_INTEGER) * -1;
-
-      // +1e6 to make initial sort by createdAt work no matter how long
-      // the server response take - sort optimistic entities as last
-      const createdAt = new Date(Date.now() + 1e6).toISOString();
-
-      queryClient.setQueryData(["todos"], (old: TodoSchema[]) => {
-        return old.concat({
-          ...newTodo,
-          description: newTodo.description || "",
-          isCompleted: false,
-          id: temporaryId,
-          createdAt,
-        });
-      });
-
-      return { temporaryId };
-    },
-    onError: (err, id, context) => {
-      queryClient.setQueryData(["todos"], (todos: TodoSchema[]) =>
-        todos.filter((todo) => todo.id !== context?.temporaryId),
-      );
-    },
-    onSuccess: (newTodo, variables, context) => {
-      queryClient.setQueryData(["todos"], (todos: TodoSchema[]) =>
-        todos
-          .filter((todo) => todo.id !== context?.temporaryId)
-          .concat(newTodo),
-      );
-    },
-    onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ["todos"] });
-    },
+    mutationKey: ["createTodo"],
+    onSettled: () => queryClient.invalidateQueries({ queryKey: ["todos"] }),
   });
 
   const form = useForm<TaskFormValues>({

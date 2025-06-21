@@ -57,37 +57,14 @@ export function EditTodoForm({ id: editedTodoId }: { id: number }) {
       cachedTodo
         ? Promise.resolve(cachedTodo)
         : getTodoById({ path: { id: editedTodoId } }),
-    staleTime: 0
+    staleTime: 0,
   });
 
   const updateTodoMutation = useMutation({
-    mutationFn: (dto: TodoUpdateSchema) =>
-      updateTodo({ body: dto, path: { id: editedTodoId } }),
-    mutationKey: ["todos", editedTodoId],
-    onMutate: async (updatedTodo) => {
-      queryClient.setQueryData(["todos"], (old: TodoSchema[]) => {
-        return old.map((todo) => {
-          if (todo.id === editedTodoId) {
-            return { ...todo, ...updatedTodo };
-          }
-
-          return todo;
-        });
-      });
-
-      return { originalTodo: editedTodo };
-    },
-    onError: (err, variables, context) => {
-      const originalTodo = context?.originalTodo;
-      if (originalTodo) {
-        queryClient.setQueryData(["todos"], (todos: TodoSchema[]) =>
-          todos.filter((todo) => todo.id !== editedTodoId).concat(originalTodo),
-        );
-      }
-    },
-    onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ["todos"] });
-    },
+    mutationFn: ({ id, ...body }: { id: number } & TodoUpdateSchema) =>
+      updateTodo({ body, path: { id } }),
+    mutationKey: ["editTodo"],
+    onSettled: () => queryClient.invalidateQueries({ queryKey: ["todos"] }),
   });
 
   const form = useForm<TaskFormValues>({
@@ -96,20 +73,22 @@ export function EditTodoForm({ id: editedTodoId }: { id: number }) {
       title: "",
       description: "",
       dueDate: undefined,
-      isCompleted: undefined
+      isCompleted: undefined,
     },
   });
 
+  const { reset } = form;
+
   useEffect(() => {
     if (editedTodo) {
-      form.reset({
-      title: editedTodo.title,
-      description: editedTodo.description,
-      dueDate: editedTodo.dueDate ? new Date(editedTodo.dueDate) : undefined,
-      isCompleted: editedTodo.isCompleted,
-    });
+      reset({
+        title: editedTodo.title,
+        description: editedTodo.description,
+        dueDate: editedTodo.dueDate ? new Date(editedTodo.dueDate) : undefined,
+        isCompleted: editedTodo.isCompleted,
+      });
     }
-  }, [editedTodo, form.reset])
+  }, [editedTodo, reset]);
 
   if (isPending) return <div>Fetching data</div>;
   if (isError) return <div>An error occurred</div>;
@@ -117,6 +96,7 @@ export function EditTodoForm({ id: editedTodoId }: { id: number }) {
   const onSubmit = (data: TaskFormValues) => {
     updateTodoMutation.mutate({
       ...data,
+      id: editedTodoId,
       dueDate: data.dueDate ? format(data.dueDate, "yyyy-MM-dd") : null,
     });
     router.push("/todos");

@@ -10,7 +10,7 @@ export default async function TodosPage() {
 
   queryClient.prefetchQuery({
     queryKey: ["todos"],
-    queryFn: () => getTodos()
+    queryFn: ({ signal }) => getTodos({ signal })
   });
 
   return (

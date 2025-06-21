@@ -5,7 +5,6 @@ from sqlalchemy import select
 from app.schemas import TodoSchema
 from app.models import Todo
 from app.schemas import TodoCreateSchema
-import asyncio
 
 router = APIRouter()
 
@@ -16,7 +15,6 @@ async def health():
 @router.get("/todos")
 async def get_todos(db: DbSession) -> list[TodoSchema]:
     result = await db.execute(select(Todo))
-    await asyncio.sleep(2)
 
     todos = result.scalars().all()
     return todos
@@ -26,7 +24,6 @@ async def get_todo_by_id(db: DbSession, id: int) -> TodoSchema:
     result = await db.execute(select(Todo).where(Todo.id == id))
     todo = result.scalar_one_or_none()
 
-    await asyncio.sleep(2)
     if not todo:
         raise HTTPException(status_code=404)
 
@@ -38,8 +35,6 @@ async def update_todo(db: DbSession, dto: TodoUpdateSchema, id: int) -> TodoSche
     if not todo:
         raise HTTPException(status_code=404)
 
-    await asyncio.sleep(3)
-
     for key, value in dto.model_dump(exclude_unset=True).items():
         setattr(todo, key, value)
     await db.commit()
@@ -49,7 +44,6 @@ async def update_todo(db: DbSession, dto: TodoUpdateSchema, id: int) -> TodoSche
 @router.post("/todos", status_code=status.HTTP_201_CREATED)
 async def create_todo(db: DbSession, dto: TodoCreateSchema) -> TodoSchema:
     todo = Todo(**dto.model_dump())
-    await asyncio.sleep(2)
 
     db.add(todo)
     await db.commit()
@@ -61,7 +55,6 @@ async def create_todo(db: DbSession, dto: TodoCreateSchema) -> TodoSchema:
 async def delete_todo(db: DbSession, id: int) -> None: 
     todo = (await db.execute(select(Todo).where(Todo.id == id))).scalar_one_or_none()
 
-    await asyncio.sleep(2)
     if not todo:
         raise HTTPException(status_code=404)
 
