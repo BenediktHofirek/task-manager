@@ -10,6 +10,7 @@
     "generate-api": "openapi-ts && node ./transform-api.js"
   },
   "dependencies": {
+    "@auth0/nextjs-auth0": "^4.7.0",
     "@hookform/resolvers": "^5.1.1",
     "@radix-ui/react-dialog": "^1.1.14",
     "@radix-ui/react-label": "^2.1.7",

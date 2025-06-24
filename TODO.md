@@ -14,7 +14,7 @@
 - [x] Move api to subfolder
 - [x] Setup NextJS basics with theme switching, color variables, css reset
 - [x] Generate Typescript api client on frontend from openapi specs
-- [ ] Implement todo crud on FE
+- [x] Implement todo crud on FE
 - [ ] Auth setup on FE
 - [ ] Auth setup on BE + users table
 - [ ] User profile in header
@@ -25,8 +25,10 @@
 - [ ] Setup gitignore
 - [ ] Setup pre-commit hooks for both be and fe formatting
 - [ ] Secret management with HC Vault
+- [ ] Docker compose for development
 - [ ] Setup github action for BE testing
 - [ ] Do reserch of best deployment options
+- [ ] Dockerize for deploy
 - [ ] Deploy
 - [ ] Setup GTA for deploy
 - [ ] Setup domain
