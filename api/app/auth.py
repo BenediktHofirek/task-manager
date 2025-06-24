@@ -1,7 +1,6 @@
+from .config import settings
 import jwt
 from jwt import PyJWKClient
-
-from .config import settings
 from .exceptions import UnauthorizedException
 
 class VerifyToken:

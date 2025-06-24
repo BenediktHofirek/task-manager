@@ -32,7 +32,7 @@ export async function withAuth<T extends Record<string,any>, R>(
   });
 }
 
-export default async function TodosTable() {
+export default function TodosTable() {
   const queryClient = useQueryClient();
 
   const {

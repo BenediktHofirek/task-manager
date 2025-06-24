@@ -11,15 +11,15 @@ from app.dependencies import AuthToken
 router = APIRouter()
 
 @router.get("/todos")
-async def get_todos(db: DbSession) -> list[TodoSchema]:
+async def get_todos(db: DbSession, user_id: UserId, auth_token: AuthToken) -> list[TodoSchema]:
+    print(f"User id is {user_id} and auth_token is {auth_token}")
     result = await db.execute(select(Todo))
 
     todos = result.scalars().all()
     return todos
 
 @router.get("/todos/{id}")
-async def get_todo_by_id(db: DbSession, id: int, user_id: UserId, auth_token: AuthToken) -> TodoSchema:
-    print(f"User id is {user_id} and auth_token is {auth_token}")
+async def get_todo_by_id(db: DbSession, id: int) -> TodoSchema:
     result = await db.execute(select(Todo).where(Todo.id == id))
     todo = result.scalar_one_or_none()
 
