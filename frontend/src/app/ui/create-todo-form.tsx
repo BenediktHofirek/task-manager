@@ -1,5 +1,6 @@
 "use client";
 
+import { getAccessToken } from "@auth0/nextjs-auth0";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -53,12 +54,18 @@ const taskSchema = z.object({
 
 type TaskFormValues = z.infer<typeof taskSchema>;
 
-export function CreateTodoForm() {
+export async function CreateTodoForm() {
   const queryClient = useQueryClient();
   const router = useRouter();
+  const authToken = await getAccessToken();
 
   const createTodoMutation = useMutation({
-    mutationFn: (dto: TodoCreateSchema) => createTodo({ body: dto }),
+    mutationFn: (dto: TodoCreateSchema) => createTodo({ 
+      body: dto,
+      headers: {
+        Authorization: `Bearer ${authToken}`
+      }
+    }),
     mutationKey: ["createTodo"],
     onSettled: () => queryClient.invalidateQueries({ queryKey: ["todos"] }),
   });

@@ -5,12 +5,10 @@ from sqlalchemy import select
 from app.schemas import TodoSchema
 from app.models import Todo
 from app.schemas import TodoCreateSchema
+from app.dependencies import UserId
+from app.dependencies import AuthToken
 
 router = APIRouter()
-
-@router.get('/health')
-async def health():
-    return { "status": "healthy" }
 
 @router.get("/todos")
 async def get_todos(db: DbSession) -> list[TodoSchema]:
@@ -20,7 +18,8 @@ async def get_todos(db: DbSession) -> list[TodoSchema]:
     return todos
 
 @router.get("/todos/{id}")
-async def get_todo_by_id(db: DbSession, id: int) -> TodoSchema:
+async def get_todo_by_id(db: DbSession, id: int, user_id: UserId, auth_token: AuthToken) -> TodoSchema:
+    print(f"User id is {user_id} and auth_token is {auth_token}")
     result = await db.execute(select(Todo).where(Todo.id == id))
     todo = result.scalar_one_or_none()
 

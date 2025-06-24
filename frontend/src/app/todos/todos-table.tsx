@@ -11,8 +11,28 @@ import {
 import { format } from "date-fns";
 import { Check, Plus, SquarePen, Trash, X } from "lucide-react";
 import Link from "next/link";
+import { getAccessToken } from "@auth0/nextjs-auth0";
 
-export default function TodosTable() {
+type HandlerWithHeaders<T, R> = (
+  payload: T & { headers: Record<string, string> },
+) => Promise<R>;
+
+export async function withAuth<T extends Record<string,any>, R>(
+  handler: HandlerWithHeaders<T, R>,
+  payload: T = {} as T,
+): Promise<R> {
+  const authToken = await getAccessToken();
+
+  return handler({
+    ...payload,
+    headers: {
+      ...(payload as any).headers,
+      Authorization: `Bearer ${authToken}`,
+    },
+  });
+}
+
+export default async function TodosTable() {
   const queryClient = useQueryClient();
 
   const {
@@ -20,7 +40,7 @@ export default function TodosTable() {
     isPending,
     isError,
   } = useSuspenseQuery({
-    queryFn: ({ signal }) => getTodos({ signal }),
+    queryFn: ({ signal }) => withAuth(getTodos, { signal }),
     queryKey: ["todos"],
   });
 
@@ -61,7 +81,10 @@ export default function TodosTable() {
   );
 
   const deleteTodoMutation = useMutation({
-    mutationFn: (path: { id: number }) => deleteTodo({ path }),
+    mutationFn: (path: { id: number }) =>
+      deleteTodo({
+        path,
+      }),
     mutationKey: ["deleteTodo"],
     onSettled: () => queryClient.invalidateQueries({ queryKey: ["todos"] }),
   });

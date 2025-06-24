@@ -6,6 +6,7 @@ from app.database import sessionmanager
 from app.utils import use_route_names_as_operation_ids
 
 from .routes import todo
+from .middleware import AuthMiddleware
 from fastapi.middleware.cors import CORSMiddleware
 
 
@@ -37,6 +38,13 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+app.add_middleware(AuthMiddleware)
+
+@app.get('/health')
+async def health():
+    return { "status": "healthy" }
+
 
 app.include_router(todo.router, prefix="/api")
 

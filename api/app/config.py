@@ -13,9 +13,15 @@ class DatabaseSettings(BaseModel):
     connection_count: int
     connection_overflow: int
 
+class AuthSettings(BaseModel):
+    auth0_domain: str
+    auth0_algorithms: str
+    auth0_api_audience: str
+    auth0_issuer: str
 
 class Settings(BaseSettings):
     db: DatabaseSettings
+    auth: AuthSettings
 
     model_config = SettingsConfigDict(
         env_file=".env",

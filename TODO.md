@@ -35,6 +35,7 @@
 - [ ] Polish design and implement responsive design
 - [ ] Implement FE tests with playwright
 - [ ] Setup GTA for frontend testing
+- [ ] LRU cache for pydantic settings
 
 
 # To read
