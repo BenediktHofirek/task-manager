@@ -11,26 +11,6 @@ import {
 import { format } from "date-fns";
 import { Check, Plus, SquarePen, Trash, X } from "lucide-react";
 import Link from "next/link";
-import { getAccessToken } from "@auth0/nextjs-auth0";
-
-type HandlerWithHeaders<T, R> = (
-  payload: T & { headers: Record<string, string> },
-) => Promise<R>;
-
-export async function withAuth<T extends Record<string,any>, R>(
-  handler: HandlerWithHeaders<T, R>,
-  payload: T = {} as T,
-): Promise<R> {
-  const authToken = await getAccessToken();
-
-  return handler({
-    ...payload,
-    headers: {
-      ...(payload as any).headers,
-      Authorization: `Bearer ${authToken}`,
-    },
-  });
-}
 
 export default function TodosTable() {
   const queryClient = useQueryClient();
@@ -40,7 +20,7 @@ export default function TodosTable() {
     isPending,
     isError,
   } = useSuspenseQuery({
-    queryFn: ({ signal }) => withAuth(getTodos, { signal }),
+    queryFn: ({ signal }) => getTodos({ signal }),
     queryKey: ["todos"],
   });
 
