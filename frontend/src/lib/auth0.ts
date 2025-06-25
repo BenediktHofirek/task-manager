@@ -28,5 +28,5 @@ export async function withAuthToken<T extends Record<string,any>, R>(
       ...(payload as any).headers,
       Authorization: `Bearer ${authToken}`,
     },
-  }).catch((x) => {console.log('result', x); return x });
+  });
 }

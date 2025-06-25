@@ -6,7 +6,6 @@ export default function TodosLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  console.log("rendering layout");
   return (
     <div className="flex h-full w-full flex-col">
       <header className="flex h-24 w-full items-center justify-between p-4">

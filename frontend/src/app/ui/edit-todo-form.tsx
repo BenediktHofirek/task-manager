@@ -40,7 +40,7 @@ const taskSchema = z.object({
 
 type TaskFormValues = z.infer<typeof taskSchema>;
 
-export async function EditTodoForm({ id: editedTodoId }: { id: number }) {
+export function EditTodoForm({ id: editedTodoId }: { id: number }) {
   const queryClient = useQueryClient();
   const router = useRouter();
 

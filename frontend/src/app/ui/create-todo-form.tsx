@@ -53,7 +53,7 @@ const taskSchema = z.object({
 
 type TaskFormValues = z.infer<typeof taskSchema>;
 
-export async function CreateTodoForm() {
+export function CreateTodoForm() {
   const queryClient = useQueryClient();
   const router = useRouter();
 
