@@ -1,6 +1,5 @@
 "use client";
 
-import { getAccessToken } from "@auth0/nextjs-auth0";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -44,7 +43,6 @@ type TaskFormValues = z.infer<typeof taskSchema>;
 export async function EditTodoForm({ id: editedTodoId }: { id: number }) {
   const queryClient = useQueryClient();
   const router = useRouter();
-  const authToken = await getAccessToken();
 
   const cachedTodo = queryClient
     .getQueryData<TodoSchema[]>(["todos"])
@@ -67,9 +65,6 @@ export async function EditTodoForm({ id: editedTodoId }: { id: number }) {
       updateTodo({
         body,
         path: { id },
-        headers: {
-          Authorization: `Bearer ${authToken}`,
-        },
       }),
     mutationKey: ["editTodo"],
     onSettled: () => queryClient.invalidateQueries({ queryKey: ["todos"] }),

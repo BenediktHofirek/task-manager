@@ -2,12 +2,9 @@ import { auth0 } from "@/lib/auth0";
 import { NextRequest } from "next/server";
 
 async function withAccessToken(req: NextRequest) {
-  const path = req.nextUrl.pathname.split('/').slice(3).join('/');
-
-  console.log('path', path)
   const { token: authToken } = await auth0.getAccessToken();
 
-  return fetch(`${process.env.API_URL}/api/${path}${req.nextUrl.search}`, {
+  return fetch(`${process.env.API_URL}${req.nextUrl.pathname}/${req.nextUrl.search}`, {
     headers: {
       Authorization: `Bearer ${authToken}`,
     },
